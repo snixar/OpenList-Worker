@@ -1,0 +1,32 @@
+{
+  // Worker 名字必须和线上一致，否则 Workers Builds 会警告并覆盖
+  "name": "openlist-worker",
+  "main": "src/backend/worker.ts",
+  "alias": {
+    "iconv-lite": "./src/backend/drivers/ftp/iconv-stub.ts"
+  },
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "keep_vars": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": false
+  },
+
+  "vars": {
+    "ENVIRONMENT": "production",
+    "DB_FORMAT": "map",
+    // 数据实际存在 KV 里，写死避免 auto 探测漂移
+    "DB_DRIVER": "kv"
+  },
+
+  // 关键：显式声明 KV 绑定，否则每次 CI 构建都会把这个绑定冲掉。
+  // 真实命名空间 id 不写进仓库：Workers Builds 部署前用 sed 把占位符替换成
+  // 构建环境变量 KV_NAMESPACE_ID（已在 Builds 设置里配好）。
+  "kv_namespaces": [
+    { "binding": "KV", "id": "__KV_NAMESPACE_ID__" }
+  ]
+}
